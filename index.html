@@ -61,21 +61,32 @@
                 }
             }
         })
+        // This is our parent component since it is the one we are inserting the created reusable component
         app.component('login-form', {
             template: `
                 <form @submit.prevent="handleSubmit">
                     <h1>{{ title }}</h1>
-                    <input type="email" v-model="email" />
-                    <input type="password" v-model="password" />
+
+                    <!-- 2. bring in the created custom component -->
+                    <!-- 3. bind the label so it can be passed as a prop to mutate the respective child variable -->
+
+                    <!-- this v-model both sends a modelValue prop and listens for the event(which updates the variable) emitted by the child -->
+
+                    <custom-input v-model="email" v-bind:label="emailLabel" />
+                    <custom-input v-model="password" :label="passwordLabel" />
                     <button type=submit >Log In</button>
                 </form>
 
             `,
+            // 3. register the component so that the parent can actually see/use it
+            components: ['custom-input'],
             data(){
                 return {
                     title: 'Login Form',
                     email: '',
-                    password: ''
+                    password: '',
+                    emailLabel: 'Email',
+                    passwordLabel: 'Password'
                 }
             },
             methods: {
@@ -84,6 +95,45 @@
                     console.log(this.password)
                 }
             }
+        })
+        // 1. create a custom component
+        app.component('custom-input', {
+            template: `
+                <label>
+                    {{ label }}
+
+                    <!-- 5. How to listen to the input and then map it to the respective one in the parent -->
+                    <!-- 6. v-model in the parent and receive a prop of modelValue due to under the hood work -->
+
+                    <input type="text" v-model="inputValue" />
+                </label>
+            
+            `,
+            // 4. the label is received from the parent as a prop so that the variable in the parent changing it
+            // can change it correctly
+            props: ['label', 'modelValue'],
+
+            // 7. use getter and setter to return the modeled values, 
+            computed: {
+                inputValue: {
+                    get() {
+                        return this.modelValue
+                    },
+                    // arg name don't matter, vue passes it as a parameter (value is from the input field via set func)
+                    // 8. emit - pass data between components, especially child to parent
+                    set(value){
+                        console.log(value)
+                        // arg 1 - type of event
+                        // arg 2 - (value is from the input field via set func)
+                        this.$emit('update:modelValue', value)
+                    }
+                }
+            },
+            // data(){
+            //     return {
+            //         inputValue: ''
+            //     }
+            // }
         })
         app.mount('#app')
     </script>

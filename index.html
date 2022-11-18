@@ -72,8 +72,12 @@
 
                     <!-- this v-model both sends a modelValue prop and listens for the event(which updates the variable) emitted by the child -->
 
-                    <custom-input v-model="email" v-bind:label="emailLabel" />
-                    <custom-input v-model="password" :label="passwordLabel" />
+                    <custom-input 
+                        v-for="(input, i) in inputs"
+                        :key="i"
+                        v-model="input.value" 
+                        v-bind:label="input.label"
+                        :type="input.type" />
                     <button type=submit >Log In</button>
                 </form>
 
@@ -83,16 +87,24 @@
             data(){
                 return {
                     title: 'Login Form',
-                    email: '',
-                    password: '',
-                    emailLabel: 'Email',
-                    passwordLabel: 'Password'
+                    inputs: [
+                        {
+                            label: 'Email',
+                            value: '',
+                            type: 'email'
+                        },
+                        {
+                            label: 'Password',
+                            value: '',
+                            type: 'password'
+                        }
+                    ],
                 }
             },
             methods: {
                 handleSubmit(){
-                    console.log(this.email)
-                    console.log(this.password)
+                    console.log(this.inputs[0].value)
+                    console.log(this.inputs[1].value)
                 }
             }
         })
@@ -105,13 +117,13 @@
                     <!-- 5. How to listen to the input and then map it to the respective one in the parent -->
                     <!-- 6. v-model in the parent and receive a prop of modelValue due to under the hood work -->
 
-                    <input type="text" v-model="inputValue" />
+                    <input :type="type" v-model="inputValue" />
                 </label>
             
             `,
             // 4. the label is received from the parent as a prop so that the variable in the parent changing it
             // can change it correctly
-            props: ['label', 'modelValue'],
+            props: ['label', 'modelValue', 'type'],
 
             // 7. use getter and setter to return the modeled values, 
             computed: {
@@ -122,7 +134,7 @@
                     // arg name don't matter, vue passes it as a parameter (value is from the input field via set func)
                     // 8. emit - pass data between components, especially child to parent
                     set(value){
-                        console.log(value)
+                        // console.log(value)
                         // arg 1 - type of event
                         // arg 2 - (value is from the input field via set func)
                         this.$emit('update:modelValue', value)
